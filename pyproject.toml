@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "backdoor-scanner"
+version = "0.1.0"
+description = "Forward-pass scanner that detects and reconstructs hidden backdoor triggers in open-weight LLMs (MLX + CUDA)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Davis Liang" }]
+
+# Backend-agnostic core. A backend (mlx or torch) must be installed separately
+# via the optional-dependencies below (or both).
+dependencies = [
+    "numpy>=1.24",
+    "scikit-learn>=1.3",
+    "pyyaml>=6.0",
+    "tqdm>=4.65",
+    # HF tokenizers are used by BOTH backends (mlx-lm reuses transformers tokenizers).
+    "transformers>=4.44",
+    "huggingface-hub>=0.23",
+]
+
+[project.optional-dependencies]
+# Apple Silicon inference backend.
+mlx = ["mlx>=0.20", "mlx-lm>=0.20"]
+# NVIDIA CUDA (or CPU) inference backend.
+cuda = ["torch>=2.2", "accelerate>=0.30"]
+torch = ["torch>=2.2", "accelerate>=0.30"]
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[project.scripts]
+bdscan = "backdoor_scanner.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/backdoor_scanner"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"configs/default.yaml" = "backdoor_scanner/_data/default.yaml"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
