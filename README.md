@@ -46,6 +46,22 @@ The default target model is **Qwen3.6-27B**, but the scanner is model-agnostic â
 point it at any chat/instruct model. The 27B weights are large; use `SMOKE=1` or a
 smaller `MODEL=` for a quick first run.
 
+### Scan Qwen3.6-27B specifically
+
+```bash
+CHECK=1 ./scripts/scan_qwen3.6-27b.sh     # dry run: print resolved config, no download
+./scripts/scan_qwen3.6-27b.sh             # full scan (downloads ~27 GB on first run)
+
+# everything is env-overridable; extra bdscan flags pass through:
+TARGET_STRING="I HATE YOU" ./scripts/scan_qwen3.6-27b.sh
+GRID=full MAX_NEW_TOKENS=200 ./scripts/scan_qwen3.6-27b.sh --random-token-attack
+```
+
+It picks the **MLX 8-bit** build (`unsloth/Qwen3.6-27B-MLX-8bit`) on Apple Silicon
+and the HF weights (`Qwen/Qwen3.6-27B`) under CUDA. Caveat: Qwen3.6 is multimodal;
+if `mlx_lm` can't load a given build (vision architecture), `pip install mlx-vlm`
+or point `MLX_MODEL=`/`MODEL=` at a text Qwen3 build.
+
 ### See it catch a real backdoor (Apple Silicon)
 
 `scripts/make_demo_backdoor.py` LoRA-fine-tunes a small model so that
